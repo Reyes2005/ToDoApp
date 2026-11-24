@@ -1,4 +1,4 @@
-# Contexto Técnico del Proyecto — ToDoApp
+# Contexto Arquitectónico y Estructura del Proyecto — ToDoApp
 
 ## 1. Descripción General
 **ToDoApp** es una aplicación nativa para Android desarrollada en **Kotlin** con **Jetpack Compose** y persistencia local estructurada sobre **Room Database (SQLite)**. Implementa el patrón arquitectónico **MVVM (Model-View-ViewModel)** con una capa de **Repository** e integración reactiva mediante **Kotlin Coroutines** y **StateFlow / Flow**.
@@ -103,6 +103,10 @@ ToDoApp/
 │       └── test/
 │           └── java/com/angel/todoapp/
 │               └── TaskViewModelTest.kt
+├── docs/
+│   ├── PROJECT_CONTEXT.md
+│   ├── REQUIREMENTS_AND_STACK.md
+│   └── TECHNICAL_GUIDE.md
 ├── Evidencias/
 │   ├── 01_empty_state.png
 │   ├── 02_validacion_titulo_vacio.png
@@ -113,33 +117,14 @@ ToDoApp/
 ├── build.gradle.kts
 ├── gradle.properties
 ├── gradlew.bat
-├── PROJECT_CONTEXT.md
 ├── README.md
-├── TECHNICAL_GUIDE.md
-└── settings.gradle.kts
+├── settings.gradle.kts
+└── ToDoApp.apk
 ```
 
 ---
 
-## 4. Dependencias y Versiones
-
-| Componente / Librería | Versión | Propósito |
-| :--- | :--- | :--- |
-| **Kotlin** | `2.0.21` | Lenguaje principal y plugin de compilación Compose |
-| **Android Gradle Plugin (AGP)** | `8.7.2` | Sistema de construcción para Android |
-| **KSP (Kotlin Symbol Processing)** | `2.0.21-1.0.27` | Procesador de anotaciones para generar código de Room |
-| **Gradle** | `8.12` | Automatización de compilación y empaquetado |
-| **Compile SDK / Target SDK** | `35` (Android 15) | Plataforma de compilación Android |
-| **Min SDK** | `24` (Android 7.0) | Compatibilidad mínima de dispositivos |
-| **Compose BOM** | `2024.10.01` | Gestión unificada de versiones de Jetpack Compose y Material 3 |
-| **Room (`room-runtime`, `room-ktx`, `room-compiler`)** | `2.6.1` | Persistencia local sobre SQLite con soporte para Coroutines y Flow |
-| **Lifecycle & ViewModel Compose** | `2.8.7` | Integración de `ViewModel` y `collectAsStateWithLifecycle` |
-| **Kotlinx Coroutines Android / Test** | `1.9.0` | Ejecución asíncrona y pruebas unitarias de flujos reactivos |
-| **JUnit** | `4.13.2` | Ejecución de pruebas unitarias de lógica y CRUD |
-
----
-
-## 5. Estado del Proyecto y Cumplimiento de Requisitos
+## 4. Estado del Proyecto y Cumplimiento de Funcionalidades
 
 | Funcionalidad Requerida | Estado | Implementación Verificada |
 | :--- | :--- | :--- |

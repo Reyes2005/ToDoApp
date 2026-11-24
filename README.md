@@ -13,26 +13,25 @@ Aplicación Android nativa desarrollada en **Kotlin** utilizando **Jetpack Compo
 7. **Persistencia local**: Almacenamiento permanente en el dispositivo mediante Room (`todo_app_database.db`).
 8. **Validación de formulario**: Verificación de título no vacío con retroalimentación visual en español.
 
-## Arquitectura del Código
+---
 
-* `app/src/main/java/com/angel/todoapp/data`:
-  * `TaskEntity.kt`, `TaskDao.kt`, `ToDoDatabase.kt`, `TaskRepository.kt`.
-* `app/src/main/java/com/angel/todoapp/viewmodel`:
-  * `TaskUiState.kt`, `TaskViewModel.kt`.
-* `app/src/main/java/com/angel/todoapp/ui`:
-  * `theme/` (`Color.kt`, `Type.kt`, `Theme.kt`), `components/` (`TaskItemCard.kt`, `EmptyStateView.kt`, `TaskFormDialog.kt`, `DeleteConfirmDialog.kt`), `screens/` (`ToDoScreen.kt`).
-* `app/src/main/java/com/angel/todoapp/`:
-  * `ToDoApplication.kt`, `MainActivity.kt`.
+## Documentación del Proyecto (`docs/`)
 
-Para más detalles arquitectónicos y guía del código, consulta [`PROJECT_CONTEXT.md`](./PROJECT_CONTEXT.md) y [`TECHNICAL_GUIDE.md`](./TECHNICAL_GUIDE.md).
+Toda la documentación técnica y explicativa se encuentra organizada en la carpeta [`docs/`](./docs):
 
-## Compilación y Pruebas desde Terminal
+* **[`docs/REQUIREMENTS_AND_STACK.md`](./docs/REQUIREMENTS_AND_STACK.md)**: Guía técnica de requerimientos del entorno (JDK, Android SDK, Gradle, KSP), listado detallado de librerías y dependencias utilizadas, e instrucciones de configuración y compilación.
+* **[`docs/TECHNICAL_GUIDE.md`](./docs/TECHNICAL_GUIDE.md)**: Manual paso a paso del *cómo y por qué* se construyó la aplicación, iniciando desde cero con la sintaxis de Kotlin, explicación de las tecnologías (Compose, Room, Coroutines, Flow), el flujo MVVM y el recorrido por cada archivo del proyecto.
+* **[`docs/PROJECT_CONTEXT.md`](./docs/PROJECT_CONTEXT.md)**: Resumen arquitectónico por capas, árbol completo de directorios y matriz de cumplimiento de requisitos.
+
+---
+
+## Inicio Rápido desde Terminal
 
 ### 1. Compilar el APK Debug
 ```powershell
 .\gradlew.bat assembleDebug
 ```
-El APK instalable se genera en `app/build/outputs/apk/debug/app-debug.apk` y se copia en la raíz como `ToDoApp.apk`.
+El APK instalable se genera en `app/build/outputs/apk/debug/app-debug.apk` y se encuentra disponible en la raíz del proyecto como [`ToDoApp.apk`](./ToDoApp.apk).
 
 ### 2. Ejecutar las Pruebas Unitarias (CRUD y MVVM)
 ```powershell
@@ -44,12 +43,14 @@ El APK instalable se genera en `app/build/outputs/apk/debug/app-debug.apk` y se 
 .\gradlew.bat installDebug
 ```
 
-## Evidencias
+---
+
+## Evidencias (`Evidencias/`)
 
 En la carpeta [`Evidencias/`](./Evidencias) se incluyen las capturas de las funcionalidades implementadas y de la verificación de compilación y pruebas:
-* `01_empty_state.png`: Pantalla Empty State cuando no hay tareas registradas.
-* `02_validacion_titulo_vacio.png`: Validación del campo título obligatorio en el formulario.
-* `03_listado_y_completado.png`: Consulta de tarjetas de tareas y marcado de tarea completada.
-* `04_edicion_tarea.png`: Diálogo de edición con datos precargados.
-* `05_confirmacion_eliminacion.png`: Diálogo de confirmación previa a la eliminación.
-* `06_compilacion_y_tests.png`: Evidencia de compilación con Gradle, generación de código Room KSP y ejecución de pruebas unitarias CRUD.
+* [`01_empty_state.png`](./Evidencias/01_empty_state.png): Pantalla Empty State cuando no hay tareas registradas.
+* [`02_validacion_titulo_vacio.png`](./Evidencias/02_validacion_titulo_vacio.png): Validación del campo título obligatorio en el formulario.
+* [`03_listado_y_completado.png`](./Evidencias/03_listado_y_completado.png): Consulta de tarjetas de tareas y marcado de tarea completada.
+* [`04_edicion_tarea.png`](./Evidencias/04_edicion_tarea.png): Diálogo de edición con datos precargados.
+* [`05_confirmacion_eliminacion.png`](./Evidencias/05_confirmacion_eliminacion.png): Diálogo de confirmación previa a la eliminación.
+* [`06_compilacion_y_tests.png`](./Evidencias/06_compilacion_y_tests.png): Evidencia de compilación con Gradle, generación de código Room KSP y ejecución de pruebas unitarias CRUD.

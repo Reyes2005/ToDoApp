@@ -1,25 +1,37 @@
-# Archivos de compilacion de Gradle, Kotlin y Android
+# Directorios de compilacion de Gradle, Kotlin y Android
 build/
 app/build/
 .gradle/
 .gradle-dist/
 .kotlin/
+captures/
+.navigation/
+.externalNativeBuild/
+.cxx/
 
-# Configuracion local de la maquina (rutas del SDK)
+# Configuracion local del entorno (rutas del SDK/NDK)
 local.properties
 
-# Binarios temporales y firmas
+# Archivos de entornos de desarrollo (Android Studio / IntelliJ IDEA / VS Code)
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Firmas, certificados y reportes temporales
 *.idsig
 *.keystore
 *.jks
 *.log
+*.hprof
+output-metadata.json
 
-# Entornos de desarrollo (Android Studio / IntelliJ IDEA / VS Code)
-.idea/
-*.iml
-.vscode/
-
-# Sistema Operativo
+# Archivos temporales y del sistema operativo
 .DS_Store
 Thumbs.db
 Desktop.ini
+*~
+*.swp
+*.bak
+*.tmp
