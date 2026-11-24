@@ -4,7 +4,7 @@ Este documento es una guía completa desde cero para entender **qué se hizo, c�
 1. **Manual de Sintaxis de Kotlin desde Cero** (para entender cada palabra clave usada en el código).
 2. **Tecnologías Utilizadas** (qué es Jetpack Compose, Room, Coroutines y Flow, y por qué se usan).
 3. **Arquitectura MVVM + Repository** (cómo viajan los datos desde la pantalla hasta la base de datos SQLite).
-4. **Recorrido Archivo por Archivo** (explicación práctica de cómo funciona cada parte de la app).
+4. **Recorrido Archivo por Archivo** (explicación práctica de cómo funciona cada parte de la aplicación).
 
 ---
 
@@ -13,43 +13,43 @@ Este documento es una guía completa desde cero para entender **qué se hizo, c�
 Si vienes de otro lenguaje o estás empezando en Kotlin, estos son los bloques fundamentales con los que está construida toda la aplicación:
 
 ### 1.1. Variables: `val` vs `var`
-En Kotlin existen dos palabras para guardar datos:
-* **`val` (Inmutable / Solo lectura):** Una vez que le asignas un valor, no puede cambiar. Es equivalente a una constante (`final` en Java). Se usa el 90% de las veces por seguridad.
+En Kotlin existen dos palabras clave para almacenar datos:
+* **`val` (Inmutable / Solo lectura):** Una vez que le asignas un valor, no puede cambiar. Es equivalente a una constante (`final` en Java). Se usa en la mayoría de los casos por seguridad.
   ```kotlin
   val nombreApp: String = "ToDoApp"
-  val maxTareas = 100 // Kotlin adivina que es un número entero (Int) automáticamente
+  val maxTareas = 100 // Inferencia de tipos: Kotlin detecta que es un entero (Int) automáticamente
   ```
-* **`var` (Mutable / Variable):** Su valor puede cambiar después.
+* **`var` (Mutable / Variable):** Su valor puede modificarse posteriormente.
   ```kotlin
   var contador = 0
   contador = 1 // Válido porque se declaró con var
   ```
 
-### 1.2. Tipos de Datos Básicos y Nulos (`?`)
-* `String`: Texto (`"Hola"`).
-* `Int` y `Long`: Números enteros (`Int` para números normales, `Long` para números grandes como IDs de base de datos o fechas en milisegundos, ej. `0L`).
-* `Boolean`: Verdadero o falso (`true` / `false`).
-* **Seguridad contra Nulos (`?`):** En Kotlin, ninguna variable puede ser nula (`null`) a menos que le pongas un signo de interrogación `?` al final del tipo. Esto evita que la app se cierre por el clásico error *NullPointerException*.
+### 1.2. Tipos de Datos Básicos y Seguridad contra Nulos (`?`)
+* `String`: Cadena de texto (`"Hola"`).
+* `Int` y `Long`: Números enteros (`Int` para enteros estándar de 32 bits; `Long` para enteros de 64 bits como identificadores de base de datos o marcas de tiempo en milisegundos, ej. `0L`).
+* `Boolean`: Valor lógico verdadero o falso (`true` / `false`).
+* **Seguridad contra Nulos (`?`):** En Kotlin, ninguna variable puede almacenar `null` a menos que se declare explícitamente con el operador `?` al final del tipo. Esto previene errores de ejecución como `NullPointerException`.
   ```kotlin
   val titulo: String = "Comprar leche" // Nunca puede ser null
-  val errorTitulo: String? = null      // Sí puede ser null (cuando no hay error)
+  val errorTitulo: String? = null      // Sí puede ser null (cuando no existe error de validación)
   ```
 
 ### 1.3. Funciones (`fun`) y Parámetros por Defecto
-Las funciones se declaran con la palabra `fun`. Pueden recibir parámetros y devolver un resultado:
+Las funciones se declaran con la palabra clave `fun`. Pueden recibir parámetros tipados y retornar un valor:
 ```kotlin
 fun sumar(a: Int, b: Int = 10): Int {
     return a + b
 }
 ```
-* Si no pasas el segundo parámetro (`sumar(5)`), Kotlin usa el valor por defecto (`10`).
-* También puedes llamar a los parámetros por su nombre (**Named Arguments**), muy usado en nuestras pantallas para que el código se lea claro:
+* Si se omite el segundo parámetro (`sumar(5)`), Kotlin utiliza el valor por defecto (`10`).
+* También es posible invocar funciones indicando el nombre de cada argumento (**Named Arguments**), práctica estándar en Jetpack Compose para mejorar la legibilidad:
   ```kotlin
   sumar(a = 5, b = 20)
   ```
 
-### 1.4. Clases de Datos (`data class`) y el método `.copy()`
-En una aplicación necesitamos representar objetos (como una **Tarea** o el **Estado de la Pantalla**). En lugar de escribir decenas de líneas, Kotlin tiene `data class`:
+### 1.4. Clases de Datos (`data class`) y el Método `.copy()`
+Para representar modelos de datos (como una **Tarea** o el **Estado de la Interfaz**), Kotlin ofrece `data class`:
 ```kotlin
 data class TaskEntity(
     val id: Long = 0L,
@@ -58,18 +58,18 @@ data class TaskEntity(
     val isCompleted: Boolean = false
 )
 ```
-**¿Por qué usamos `data class`?**
-Porque Kotlin le genera automáticamente un método llamado **`.copy()`**. Como nuestras variables son `val` (inmutables), cuando queremos cambiar un solo dato (por ejemplo, marcar una tarea como completada), creamos una copia idéntica cambiando solo ese campo:
+**¿Por qué se utiliza `data class`?**
+Porque el compilador genera automáticamente `equals()`, `hashCode()`, `toString()` y el método **`.copy()`**. Como las propiedades son inmutables (`val`), cuando necesitamos modificar un campo (por ejemplo, marcar una tarea como completada), creamos una nueva instancia copiando los demás valores:
 ```kotlin
 val tareaCompletada = tareaOriginal.copy(isCompleted = true)
 ```
 
 ### 1.5. Interfaces (`interface`)
-Una `interface` es un **contrato**: define *qué acciones existen*, pero sin decir *cómo se hacen por dentro*.
-* En `TaskDao.kt` y `TaskRepository.kt` usamos interfaces para declarar funciones como `insertTask(...)` o `deleteTask(...)`. Así, Room o nuestro repositorio se encargan del trabajo pesado por detrás.
+Una `interface` define un **contrato**: especifica *qué operaciones están disponibles*, sin imponer *cómo se implementan internamente*.
+* En `TaskDao.kt` y `TaskRepository.kt` utilizamos interfaces para declarar operaciones como `insertTask(...)`, `updateTask(...)` o `deleteTask(...)`. De este modo, Room genera la implementación SQL real y el `ViewModel` permanece desacoplado.
 
 ### 1.6. Condicionales y Expresión `when`
-Además del `if / else` tradicional, Kotlin tiene **`when`** (una versión mucho más limpia del `switch` de otros lenguajes) que puede devolver un valor directamente:
+Además de la estructura condicional `if / else`, Kotlin incorpora **`when`**, que evalúa múltiples ramas y puede retornar un valor directamente:
 ```kotlin
 val textoEstado = when (filter) {
     TaskFilter.ALL -> "Todas las tareas"
@@ -78,170 +78,120 @@ val textoEstado = when (filter) {
 }
 ```
 
-### 1.7. Lambdas `{ }` (Funciones como Parámetros)
-En Kotlin puedes pasar una acción (una función sin nombre encerrada entre llaves `{ }`) a otro componente. Esto es la base de todos los botones y pantallas:
+### 1.7. Expresiones Lambda `{ }` (Funciones como Parámetros)
+En Kotlin es posible pasar bloques de código (`{ ... }`) como argumentos a otras funciones. Este mecanismo se usa en todos los eventos de interfaz y operaciones sobre listas:
 ```kotlin
 Button(onClick = { viewModel.saveTask() }) {
     Text("Guardar")
 }
 ```
-* `onClick = { ... }` significa: *"Cuando el usuario toque este botón, ejecuta lo que está dentro de estas llaves"*.
-* Cuando una lambda recibe un solo dato, Kotlin lo llama automáticamente **`it`**:
+* `onClick = { ... }` indica la acción que se ejecutará cuando el usuario pulse el botón.
+* Cuando una expresión lambda recibe un único parámetro, Kotlin permite referenciarlo implícitamente con **`it`**:
   ```kotlin
-  tasks.filter { !it.isCompleted } // Filtra las tareas donde 'it' (cada tarea) NO esté completada
+  tasks.filter { !it.isCompleted } // Filtra las tareas donde 'it' (cada tarea) no esté completada
   ```
 
 ### 1.8. Funciones `suspend` (Coroutines)
-Una función que lleva la palabra **`suspend`** antes de `fun`:
+Las funciones precedidas por el modificador **`suspend`** indican operaciones asíncronas:
 ```kotlin
 suspend fun insertTask(task: TaskEntity): Long
 ```
-* **¿Qué significa?** Que es una operación que puede tardar unos milisegundos (como escribir en el disco duro/SQLite) y **no debe congelar la pantalla del teléfono**. Kotlin la pausa y la ejecuta en segundo plano sin trabar la interfaz.
+* **¿Por qué se usan?** Las operaciones de lectura y escritura en disco (SQLite) toman tiempo y no deben ejecutarse en el hilo principal de la interfaz. El modificador `suspend` permite pausar y reanudar la tarea en un hilo secundario sin congelar la pantalla.
 
 ---
 
 ## Parte 2: Tecnologías Utilizadas (¿Qué son y por qué se eligieron?)
 
-Para que **ToDoApp** sea una aplicación Android moderna y profesional, se utilizaron las herramientas oficiales recomendadas hoy por Google:
-
 ### 2.1. Jetpack Compose (Interfaz Gráfica Declarativa)
-* **¿Qué es?** Es la tecnología moderna de Android para construir pantallas directamente en código Kotlin, reemplazando a los antiguos archivos `.xml`.
-* **¿Cómo funciona?** Se basa en funciones con la etiqueta **`@Composable`**. En vez de buscar botones con `findViewById` y cambiarles el texto a mano, en Compose tú dices: *"La pantalla se dibuja según el estado actual (`uiState`). Si `uiState.isFormDialogVisible` es `true`, dibuja el diálogo; si la lista está vacía, dibuja el Empty State"*.
-* **¿Por qué se usó?** Menos código, cero desincronización entre lo que hay en memoria y lo que ve el usuario, y soporte nativo para **Material Design 3** (tarjetas, chips, iconos y animaciones).
+* **¿Qué es?** Es el kit de herramientas moderno de Android para construir interfaces nativas directamente en Kotlin, prescindiendo de archivos XML de vistas.
+* **¿Cómo funciona?** Se basa en funciones anotadas con **`@Composable`**. En lugar de mutar vistas manualmente con `findViewById`, la interfaz es una función del estado actual (`uiState`): cada vez que `uiState` cambia, Compose recompone únicamente los elementos visuales afectados.
+* **¿Por qué se eligió?** Reduce drásticamente el código repetitivo, evita inconsistencias visuales y ofrece componentes oficiales de **Material Design 3** (`Scaffold`, `Card`, `FilterChip`, `AlertDialog`, `OutlinedTextField`).
 
 ### 2.2. Room Database sobre SQLite (Persistencia Local)
-* **¿Qué es?** SQLite es el motor de base de datos que viene integrado dentro de todos los teléfonos Android. **Room** es la librería oficial de Google que se coloca encima de SQLite.
-* **¿Por qué se usó Room en vez de SQLite crudo?**
-  1. Verifica en tiempo de compilación que tus consultas SQL (`SELECT`, `UPDATE`) no tengan errores de escritura.
-  2. Convierte automáticamente las filas de la tabla SQL en objetos Kotlin (`TaskEntity`).
-  3. Se conecta directamente con `Flow` y `Coroutines`.
-* **Los 3 pilares de Room en nuestro proyecto:**
-  1. **`@Entity` (`TaskEntity.kt`):** Define el molde de la tabla `tasks` y sus columnas.
-  2. **`@Dao` (`TaskDao.kt`):** Define las operaciones SQL (insertar, consultar, editar, borrar).
-  3. **`@Database` (`ToDoDatabase.kt`):** Crea y administra el archivo físico `todo_app_database.db` dentro de la memoria interna del teléfono.
+* **¿Qué es?** SQLite es el motor de base de datos relacional integrado en Android. **Room** es la capa de abstracción oficial sobre SQLite.
+* **¿Por qué usar Room en lugar de SQLite directo?**
+  1. Valida la sintaxis y tablas de las consultas SQL en tiempo de compilación (mediante KSP).
+  2. Mapea automáticamente los registros SQL a objetos `TaskEntity` de Kotlin.
+  3. Soporta `Flow` y funciones `suspend` de forma nativa.
+* **Componentes de Room en el proyecto:**
+  1. **`@Entity` (`TaskEntity.kt`):** Define el esquema de la tabla `tasks`.
+  2. **`@Dao` (`TaskDao.kt`):** Define las consultas y transacciones SQL (`@Query`, `@Insert`, `@Update`, `@Delete`).
+  3. **`@Database` (`ToDoDatabase.kt`):** Gestiona la conexión con el archivo físico `todo_app_database.db`.
 
-### 2.3. Kotlin Coroutines (Operaciones Asíncronas)
-* **¿Qué problema resuelven?** En Android existe un hilo principal llamado **Main Thread (o UI Thread)** encargado de dibujar la pantalla a 60/120 cuadros por segundo. Android prohíbe leer o escribir bases de datos en ese hilo porque la pantalla se congelaría.
-* **¿Cómo lo resolvemos?** Con **Coroutines** (`viewModelScope.launch { ... }` y funciones `suspend`). Permiten lanzar la escritura o borrado en SQLite en segundo plano y regresar el resultado a la pantalla sin bloquear al usuario.
+### 2.3. Kotlin Coroutines (Ejecución Asíncrona)
+* **¿Qué problema resuelven?** Android bloquea cualquier intento de acceso a base de datos en el hilo principal (*Main Thread*) para evitar que la interfaz deje de responder.
+* **¿Cómo se aplican?** El `TaskViewModel` lanza operaciones dentro de `viewModelScope.launch { ... }`, delegando en Room la ejecución segura en hilos de entrada/salida (I/O).
 
-### 2.4. Kotlin Flow y StateFlow (Observación Reactiva de Datos)
-* **¿Qué es un `Flow`?** Imagina una tubería por donde viajan datos en vivo. En lugar de pedirle a la base de datos *"dame las tareas"* cada vez que insertas o borras algo, `TaskDao` devuelve un `Flow<List<TaskEntity>>`.
-* **¿Por qué es tan útil?** Cada vez que se inserta, edita, completa o elimina una fila en la tabla `tasks` de SQLite, **Room empuja automáticamente la lista actualizada por la tubería `Flow`**, el `ViewModel` la recibe en su `StateFlow` y **Jetpack Compose redibuja la pantalla al instante**.
+### 2.4. Kotlin Flow y StateFlow (Flujo Reactivo de Datos)
+* **¿Qué es `Flow`?** Es un flujo de datos asíncrono que emite valores secuencialmente. En `TaskDao`, la consulta `observeAllTasks()` retorna `Flow<List<TaskEntity>>`.
+* **¿Por qué se utiliza?** Cada vez que se inserta, edita, completa o elimina una tarea en SQLite, Room emite automáticamente la nueva lista a través del `Flow`. El `TaskViewModel` actualiza su `StateFlow<TaskUiState>` y Jetpack Compose actualiza la pantalla en tiempo real.
 
 ---
 
 ## Parte 3: Arquitectura MVVM + Repository
 
-Una regla fundamental del desarrollo profesional es **no mezclar todo en un solo archivo**. Si pones las consultas SQL junto con el código que dibuja los botones, la app se vuelve imposible de mantener o probar.
-
-Por eso implementamos la arquitectura **MVVM (Model - View - ViewModel)** con un **Repository**:
+Para mantener el código organizado, escalable y fácil de probar, se implementó la arquitectura **MVVM (Model - View - ViewModel)** complementada con el patrón **Repository**:
 
 ```text
 [ Usuario ]
-    │  (1) Toca un botón o escribe texto
+    │  (1) Interactúa con la pantalla (pulsa botón o escribe texto)
     ▼
-[ VIEW: Jetpack Compose (ToDoScreen / Componentes) ]
-    │  (2) Llama a una función del ViewModel (ej. viewModel.saveTask())
+[ VIEW: Jetpack Compose (ToDoScreen y Componentes UI) ]
+    │  (2) Invoca un método del ViewModel (ej. viewModel.saveTask())
     ▼
 [ VIEWMODEL: TaskViewModel + TaskUiState ]
-    │  (3) Valida los datos (ej. que el título no esté vacío)
+    │  (3) Ejecuta validaciones (ej. título no vacío)
     │      y lanza una Coroutine hacia el Repository
     ▼
 [ REPOSITORY: TaskRepository / RoomTaskRepository ]
-    │  (4) Prepara la entidad y llama al DAO
+    │  (4) Normaliza los datos y llama al DAO
     ▼
 [ DATA (Room SQLite): TaskDao -> ToDoDatabase (todo_app_database.db) ]
-    │  (5) Guarda en disco y emite la nueva lista por el Flow
-    └──────────────────────► Actualiza el StateFlow del ViewModel ──► Redibuja la Vista
+    │  (5) Persiste el cambio en disco y emite la lista actualizada por Flow
+    └──────────────────────► Actualiza StateFlow en ViewModel ──► Recompone la UI
 ```
 
-### ¿Por qué existe cada capa?
-1. **Capa `data` (Model + Repository):** Solo sabe hablar con SQLite. No tiene idea de qué colores tiene la pantalla ni qué botones existen.
-2. **Capa `viewmodel` (ViewModel + UiState):** Es el "cerebro" de la pantalla. Recibe lo que el usuario quiere hacer, valida reglas (como impedir guardar un título vacío), coordina con el repositorio y mantiene el estado (`TaskUiState`) vivo aunque el usuario gire la pantalla del teléfono.
-3. **Capa `ui` (View):** Es "tonta" a propósito: solo dibuja lo que dice `TaskUiState` y avisa al `ViewModel` cuando el usuario toca algo.
+### Separación de Responsabilidades
+1. **Paquete `data` (Model + Repository):** Gestiona exclusivamente el almacenamiento SQLite. No conoce elementos de interfaz ni estados de pantalla.
+2. **Paquete `viewmodel` (ViewModel + UiState):** Contiene la lógica de presentación y validación, sobreviviendo a cambios de configuración (como rotaciones de pantalla).
+3. **Paquete `ui` (View):** Renderiza el estado expuesto por el `ViewModel` y notifica las acciones del usuario.
 
 ---
 
 ## Parte 4: Recorrido Paso a Paso por los Archivos del Proyecto
 
-A continuación se explica qué hace cada archivo que creamos dentro de `app/src/main/java/com/angel/todoapp/`:
+### 4.1. Capa de Datos (`app/src/main/java/com/angel/todoapp/data/`)
 
-### 4.1. Capa de Datos (`data/`)
+1. **`TaskEntity.kt`:**
+   * Declara `@Entity(tableName = "tasks")`.
+   * Incluye `@PrimaryKey(autoGenerate = true) val id: Long = 0L`, además de `title`, `description`, `isCompleted`, `createdAt` y `updatedAt`.
+2. **`TaskDao.kt`:**
+   * **`observeAllTasks()`:** Ejecuta `SELECT * FROM tasks ORDER BY is_completed ASC, updated_at DESC` y retorna un `Flow<List<TaskEntity>>` para mostrar primero las tareas pendientes y luego las completadas.
+   * **`insertTask()` / `updateTask()` / `updateCompletionStatus()` / `deleteTask()`:** Operaciones `suspend` para completar el ciclo CRUD.
+3. **`ToDoDatabase.kt`:**
+   * Implementa `RoomDatabase` con patrón Singleton (`@Volatile` y `synchronized`) sobre el archivo `todo_app_database.db`, garantizando una única instancia activa en memoria.
+4. **`TaskRepository.kt`:**
+   * Define la interfaz `TaskRepository` y la clase `RoomTaskRepository`, limpiando espacios en blanco (`.trim()`) y actualizando las marcas de tiempo (`System.currentTimeMillis()`) en cada escritura.
 
-#### 1. `TaskEntity.kt` — La tabla SQLite
-Define cómo se guarda una tarea en la base de datos:
-* `@Entity(tableName = "tasks")`: Le indica a Room que cree una tabla llamada `tasks`.
-* `@PrimaryKey(autoGenerate = true) val id: Long = 0L`: Crea un ID único autoincremental (1, 2, 3...) para cada tarea registrada.
-* Guarda `title` (título), `description` (descripción), `isCompleted` (si ya se completó o no), `createdAt` y `updatedAt` (fechas en milisegundos).
+### 4.2. Capa de Lógica (`app/src/main/java/com/angel/todoapp/viewmodel/`)
 
-#### 2. `TaskDao.kt` — Las operaciones SQL (CRUD)
-Contiene las 4 operaciones básicas (**C**reate, **R**ead, **U**pdate, **D**elete):
-* **Read (Consultar):**
-  ```kotlin
-  @Query("SELECT * FROM tasks ORDER BY is_completed ASC, updated_at DESC")
-  fun observeAllTasks(): Flow<List<TaskEntity>>
-  ```
-  Ordena las tareas para que las **Pendientes (`is_completed = 0`) aparezcan arriba** y las completadas abajo, ordenadas de la más reciente a la más antigua.
-* **Create (Registrar):** `@Insert suspend fun insertTask(task: TaskEntity): Long`
-* **Update (Editar / Completar):** `@Update suspend fun updateTask(task: TaskEntity)` y `@Query("UPDATE tasks SET is_completed = ...")` para marcar o desmarcar rápido.
-* **Delete (Eliminar):** `@Delete suspend fun deleteTask(task: TaskEntity)`
+5. **`TaskUiState.kt`:**
+   * Modela el estado completo de la pantalla: lista de tareas, filtro activo (`ALL`, `PENDING`, `COMPLETED`), contadores (`totalCount`, `pendingCount`, `completedCount`), visibilidad del formulario modal, mensaje de error de validación (`titleError`) y tarea pendiente de confirmación de borrado (`taskPendingDeletion`).
+6. **`TaskViewModel.kt`:**
+   * Se suscribe en su bloque `init` al flujo `repository.allTasks`.
+   * En `saveTask()` verifica que `titleInput.trim()` no esté vacío; si está vacío, asigna el mensaje `"El título de la tarea es obligatorio y no puede estar vacío."` a `titleError` e impide la escritura en base de datos.
+   * Gestiona la edición, el cambio de estado completado/pendiente y la confirmación previa a la eliminación.
 
-#### 3. `ToDoDatabase.kt` — El motor Room
-Conecta `TaskEntity` con `TaskDao`.
-* Usa el patrón **Singleton** (`@Volatile private var INSTANCE: ToDoDatabase? = null` y `synchronized(this)`).
-* **¿Por qué Singleton?** Porque abrir una conexión a un archivo SQLite consume memoria. El Singleton garantiza que en toda la aplicación solo exista **una única conexión abierta** al archivo `todo_app_database.db`.
+### 4.3. Capa de Interfaz (`app/src/main/java/com/angel/todoapp/ui/`)
 
-#### 4. `TaskRepository.kt` — El intermediario limpio
-Define la interfaz `TaskRepository` y la clase `RoomTaskRepository`.
-* Cuando el `ViewModel` pide agregar una tarea (`addTask(title, description)`), el repositorio limpia espacios sobrantes (`.trim()`), asigna la hora actual (`System.currentTimeMillis()`) y la manda al DAO.
-* Además, al ser una interfaz, nos permitió crear un `FakeTaskDao` en las pruebas unitarias (`TaskViewModelTest.kt`) para probar toda la lógica sin necesitar un teléfono conectado.
-
----
-
-### 4.2. Capa de Lógica y Estado (`viewmodel/`)
-
-#### 5. `TaskUiState.kt` — La fotografía de la pantalla
-Es una `data class` que contiene absolutamente todo lo que la pantalla necesita saber en un instante dado:
-* `tasks`: La lista completa que viene de Room.
-* `filter`: El filtro seleccionado (`ALL`, `PENDING`, `COMPLETED`).
-* `filteredTasks`: Una propiedad calculada que devuelve las tareas según el filtro activo.
-* `totalCount`, `pendingCount`, `completedCount`: Contadores automáticos para el panel verde superior.
-* `isFormDialogVisible`, `editingTask`, `titleInput`, `descriptionInput`, `titleError`: Controlan si la ventana de "Nueva tarea / Editar tarea" está abierta, qué texto tiene escrito el usuario y si hay un error por dejar el título vacío.
-* `taskPendingDeletion`: Guarda temporalmente la tarea que el usuario quiere borrar mientras está abierta la ventana de `"¿Estás seguro de eliminar?"`.
-
-#### 6. `TaskViewModel.kt` — El controlador de eventos
-* En su bloque `init { observeTasks() }`, empieza a escuchar el `Flow` de Room apenas se abre la app.
-* **`saveTask()` (Validación + Guardado):**
-  1. Toma `titleInput.trim()`.
-  2. **Regla de negocio:** Si está vacío (`cleanTitle.isEmpty()`), **no guarda nada en Room** y actualiza `titleError = "El título de la tarea es obligatorio y no puede estar vacío."`.
-  3. Si el título es válido, revisa si `editingTask == null`. Si es `null`, inserta una tarea nueva (`repository.addTask(...)`); si no es `null`, actualiza la tarea existente (`repository.updateTask(...)`).
-* **`toggleTaskCompletion(task)`:** Invierte el valor `isCompleted` en la base de datos y muestra un mensaje `Snackbar` en español.
-* **`requestDeleteConfirmation(task)` y `confirmDeleteTask()`:** Implementan el borrado en dos pasos para cumplir con la confirmación obligatoria antes de eliminar.
-
----
-
-### 4.3. Capa de Interfaz de Usuario (`ui/`)
-
-#### 7. `ui/theme/` (`Color.kt`, `Type.kt`, `Theme.kt`)
-Define la identidad visual solicitada:
-* **Tonos verdes principales:** Verde esmeralda profundo (`#1B6B4A`) para barras principales, botones y acentos; verde salvia claro (`#D6F2E3`) para contenedores e iconos; y fondos neutros suaves (`#F6F8F6`) con tarjetas blancas (`#FFFFFF`) para que la lectura sea limpia y descansada.
-
-#### 8. `ui/components/` — Piezas visuales independientes
-En lugar de hacer una pantalla gigante, dividimos la interfaz en 4 piezas reutilizables:
-* **`TaskItemCard.kt`:** Dibuja la tarjeta de cada tarea. Si la tarea está completada, tacha el texto (`TextDecoration.LineThrough`), cambia el borde a verde suave y muestra la etiqueta `"Completada"`. Incluye los tres botones de acción: el círculo izquierdo (completar/desmarcar), el lápiz (editar) y el bote de basura rojo (eliminar).
-* **`EmptyStateView.kt`:** Cuando `filteredTasks.isEmpty()` es verdadero (no hay tareas en la base de datos), muestra un círculo verde con un icono de lista, un mensaje claro en español y el botón `"Crear primera tarea"`.
-* **`TaskFormDialog.kt`:** Es la ventana emergente con los dos campos (`OutlinedTextField`) para Título y Descripción. Si `titleError` no es nulo, pinta el borde del campo en rojo y muestra el mensaje de validación debajo.
-* **`DeleteConfirmDialog.kt`:** Es el cuadro de diálogo de advertencia que pregunta si realmente deseas borrar la tarea seleccionada, con los botones `"Cancelar"` y `"Eliminar"`.
-
-#### 9. `ui/screens/ToDoScreen.kt` — La pantalla principal
-Une todas las piezas dentro de un `Scaffold` de Material 3:
-* **`topBar`**: Barra superior con el logo y título de `ToDoApp`.
-* **`SummaryHeaderCard`**: Panel verde superior que muestra en vivo cuántas tareas hay en Total, Pendientes y Completadas.
-* **`FilterChipsRow`**: Botones de filtro (`Todas`, `Pendientes`, `Completadas`).
-* **`LazyColumn`**: Lista optimizada que solo dibuja en memoria las tarjetas visibles en pantalla.
-* **`floatingActionButton`**: El botón flotante `"+ Nueva tarea"` en la esquina inferior derecha.
-
-#### 10. `ToDoApplication.kt` y `MainActivity.kt` — El arranque de la App
-* Cuando abres la app en Android, primero se ejecuta **`ToDoApplication`**, que prepara la instancia única de `ToDoDatabase` y `RoomTaskRepository`.
-* Luego se abre **`MainActivity`**, que crea el `TaskViewModel` conectado a ese repositorio y lanza `ToDoScreen` dentro de `setContent { ToDoAppTheme { ... } }`.
-* **¿Por qué se conservan los datos al cerrar y volver a abrir la app?** Porque Room guarda cada cambio inmediatamente en el archivo físico SQLite `/data/data/com.angel.todoapp/databases/todo_app_database.db` del dispositivo. Al reabrir la app, `observeAllTasks()` lee ese archivo y restaura todas tus tareas automáticamente.
+7. **`ui/theme/` (`Color.kt`, `Type.kt`, `Theme.kt`):**
+   * Configura el esquema Material 3 con tonos verdes (`EmeraldPrimary #1B6B4A`, `EmeraldPrimaryContainer #D6F2E3`, `SageSecondary #4C6357`) y fondos neutros (`NeutralBackground #F6F8F6`).
+8. **`ui/components/`:**
+   * **`TaskItemCard.kt`:** Tarjeta de cada tarea con indicador circular de completado, etiqueta de estado (`Pendiente` / `Completada`), fecha de actualización y botones para editar y eliminar.
+   * **`EmptyStateView.kt`:** Vista Empty State que se muestra automáticamente cuando no existen tareas registradas.
+   * **`TaskFormDialog.kt`:** Diálogo modal para registrar o editar tareas con validación visual en el campo de título.
+   * **`DeleteConfirmDialog.kt`:** Diálogo de confirmación antes de eliminar definitivamente una tarea.
+9. **`ui/screens/ToDoScreen.kt`:**
+   * Integra la barra superior (`TopAppBar`), la tarjeta de resumen de métricas (`SummaryHeaderCard`), los filtros (`FilterChipsRow`), el listado (`LazyColumn`) o `EmptyStateView`, el botón flotante (`ExtendedFloatingActionButton`) y el host de notificaciones (`SnackbarHost`).
+10. **`ToDoApplication.kt` y `MainActivity.kt`:**
+    * Inicializan la base de datos y el repositorio al arrancar la aplicación e inyectan el `TaskViewModel` en la jerarquía de Jetpack Compose.
